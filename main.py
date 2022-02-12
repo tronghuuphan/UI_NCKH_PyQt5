@@ -8,11 +8,15 @@ import cv2
 import os
 
 # User modules import
-from scripts_jetsonnano_to_database import *
+from scripts_jetsonnano_to_database import insert_log_database
+from scripts_checkin import get_data_checkin
+from scripts_database_to_jetsonano import get_image_to_train
+
 
 BASE_DIR = os.getcwd()
 IMAGE_DIR = os.path.join(BASE_DIR, 'tmp')
 
+info = None
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -24,24 +28,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.showtext('d', 'd', 'd', 'd')
         self.addlogo()
 
-        #Activate Thread
+        # Activate Thread
         self.activate_camera_thread()
         self.activate_upload_thread()
-        self.activate_get_more_data_to_display_thread()
+        self.activate_get_more_data_to_display_thread(105180292)
+        self.activate_get_data_to_train()
 
     def activate_camera_thread(self):
         self.thread[1] = VideoThread()
-        print(self.thread[1])
         self.thread[1].change_pixmap_signal.connect(self.update_image)
         self.thread[1].start()
 
-    def activate_get_more_data_to_display_thread(self):
-        self.thread[2] = TestThread1(parent=None)
+    def activate_get_more_data_to_display_thread(self, CCCD):
+        self.thread[2] = GetDataDisplayThread(CCCD)
         self.thread[2].start()
+
     def activate_upload_thread(self):
         self.thread[3] = UploadThread(parent=None)
         self.thread[3].start()
 
+    def activate_get_data_to_train(self):
+        self.thread[4] = GetDataToTrainThread(parent=None)
+        self.thread[4].start()
 
     def addimage(self):  # Add image to Main Window
         qpixmap = QPixmap('pythonlogo.png')
@@ -109,7 +117,7 @@ class UploadThread(QtCore.QThread):
 
     def run(self):
         os.chdir(IMAGE_DIR)
-        print('Start Thread Test')
+        print('Start Upload Thread to Log Table')
         while True:
             if os.listdir(IMAGE_DIR):
                 img_name = os.listdir(IMAGE_DIR)[0]
@@ -127,19 +135,32 @@ class UploadThread(QtCore.QThread):
         self._run_flag = False
 
 
-class TestThread1(QtCore.QThread):
+class GetDataToTrainThread(QtCore.QThread):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._run_flag = True
 
     def run(self):
-        print('Start Thread Test 2....')
+        print('Start Thread To Train....')
         while True:
-            pass
+            get_image_to_train()
 
     def stop(self):
         self._run_flag = False
 
+class GetDataDisplayThread(QtCore.QThread):
+    def __init__(self, CCCD, parent=None):
+        super().__init__(parent)
+        self.CCCD = CCCD
+        self._run_flag = True
+    
+    def run(self):
+        print('Start Thread Get Data from Database To Display....')
+       # return get_data_checkin(self.CCCD)
+       
+    
+    def stop(self):
+        self._run_flag = False
 
 app = QtWidgets.QApplication(sys.argv)
 mainWindow = MainWindow()
