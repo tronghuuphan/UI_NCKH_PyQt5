@@ -29,9 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Activate Thread
         self.activate_camera_thread()
-        self.activate_upload_thread()
+        self.activate_upload_download_image_thread()
         self.activate_get_more_data_to_display_thread(105180292)
-      #  self.activate_get_data_to_train()
 
     def activate_camera_thread(self):
         self.thread[1] = VideoThread()
@@ -42,13 +41,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread[2] = GetDataDisplayThread(CCCD)
         self.thread[2].start()
 
-    def activate_upload_thread(self):
+    def activate_upload_download_image_thread(self):
         self.thread[3] = UploadDownloadImageThread(parent=None)
         self.thread[3].start()
-
-    def activate_get_data_to_train(self):
-        self.thread[4] = GetDataToTrainThread(parent=None)
-        self.thread[4].start()
 
     def addimage(self):  # Add image to Main Window
         qpixmap = QPixmap('pythonlogo.png')
