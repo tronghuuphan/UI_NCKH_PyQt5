@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="logo2">
+    <file>khoadien.png</file>
+  </qresource>
+</RCC>

@@ -7,22 +7,25 @@ import time
 import cv2
 import os
 
-#User modules import
+# User modules import
 from scripts_jetsonnano_to_database import *
 
 BASE_DIR = os.getcwd()
 IMAGE_DIR = os.path.join(BASE_DIR, 'tmp')
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
-        self.ui = uic.loadUi('UI_NCKH_2022.ui', self)
+        self.ui = uic.loadUi('designer.ui', self)
     #    self.showFullScreen()
 
         self.thread = {}
         self.activate_camera_thread()
         self.activate_test_thread()
         self.activate_test_thread_1()
+        self.showtext('d', 'd', 'd', 'd')
+        self.addlogo()
 
     def activate_test_thread(self):
         self.thread[1] = TestThread(parent=None)
@@ -38,11 +41,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread[2].change_pixmap_signal.connect(self.update_image)
         self.thread[2].start()
 
+    def addimage(self):  # Add image to Main Window
+        qpixmap = QPixmap('pythonlogo.png')
+        self.uic.image.setPixmap(qpixmap)
+
+    def showtext(self, inforCCCD, inforName, inforDoB, inforClass):  # Add Text to Main Window
+        self.inforCCCD.setText(str(inforCCCD))
+        self.inforName.setText(str(inforName))
+        self.inforDoB.setText(str(inforDoB))
+        self.inforClass.setText(str(inforClass))
+
+    def addlogo(self):  # Add logo and background
+        logoclb = QPixmap('bkmaker.png')
+        logokhoa = QPixmap('khoadien.png')
+        background = QPixmap('background.png')
+        self.logoclb.setPixmap(logoclb)
+        self.logokhoa.setPixmap(logokhoa)
+        self.background.setPixmap(logokhoa)
+
     @QtCore.pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
         """Updates the image_label with a new opencv image"""
         qt_img = self.convert_cv_qt(cv_img)
-        self.cameraFrame.setPixmap(qt_img)
+        self.cam.setPixmap(qt_img)
 
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
@@ -94,7 +115,8 @@ class TestThread(QtCore.QThread):
                 img_data = img_name.split('.')[0]
                 img_data = img_data.split('_')
                 #insert_log_database(img_data[0], img_data[1], img_data[2], img_data[3], img_data[4], img_name)
-                insert_log_database(105180292, img_data[1], img_data[2], img_data[3], img_data[4], img_name)
+                insert_log_database(
+                    105180292, img_data[1], img_data[2], img_data[3], img_data[4], img_name)
                 print(img_data)
                 img_path = os.path.join(IMAGE_DIR, img_name)
                 os.remove(img_path)

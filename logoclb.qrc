@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="logo">
+    <file>bkmaker.png</file>
+  </qresource>
+</RCC>
