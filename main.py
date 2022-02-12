@@ -21,25 +21,27 @@ class MainWindow(QtWidgets.QMainWindow):
     #    self.showFullScreen()
 
         self.thread = {}
-        self.activate_camera_thread()
-        self.activate_test_thread()
-        self.activate_test_thread_1()
         self.showtext('d', 'd', 'd', 'd')
         self.addlogo()
 
-    def activate_test_thread(self):
-        self.thread[1] = TestThread(parent=None)
-        self.thread[1].start()
-
-    def activate_test_thread_1(self):
-        self.thread[3] = TestThread1(parent=None)
-        self.thread[3].start()
+        #Activate Thread
+        self.activate_camera_thread()
+        self.activate_upload_thread()
+        self.activate_get_more_data_to_display_thread()
 
     def activate_camera_thread(self):
-        self.thread[2] = VideoThread()
-        print(self.thread[2])
-        self.thread[2].change_pixmap_signal.connect(self.update_image)
+        self.thread[1] = VideoThread()
+        print(self.thread[1])
+        self.thread[1].change_pixmap_signal.connect(self.update_image)
+        self.thread[1].start()
+
+    def activate_get_more_data_to_display_thread(self):
+        self.thread[2] = TestThread1(parent=None)
         self.thread[2].start()
+    def activate_upload_thread(self):
+        self.thread[3] = UploadThread(parent=None)
+        self.thread[3].start()
+
 
     def addimage(self):  # Add image to Main Window
         qpixmap = QPixmap('pythonlogo.png')
@@ -54,10 +56,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def addlogo(self):  # Add logo and background
         logoclb = QPixmap('bkmaker.png')
         logokhoa = QPixmap('khoadien.png')
-        background = QPixmap('background.png')
+        background = QPixmap('background.jpg')
         self.logoclb.setPixmap(logoclb)
         self.logokhoa.setPixmap(logokhoa)
-        self.background.setPixmap(logokhoa)
+        self.background.setPixmap(background)
 
     @QtCore.pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
@@ -72,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
         bytes_per_line = ch * w
         convert_to_Qt_format = QtGui.QImage(
             rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        p = convert_to_Qt_format.scaled(800, 611, QtCore.Qt.KeepAspectRatio)
+        p = convert_to_Qt_format.scaled(811, 601, QtCore.Qt.KeepAspectRatio)
         return QPixmap.fromImage(p)
 
 
@@ -100,7 +102,7 @@ class VideoThread(QtCore.QThread):
         # self.wait()
 
 
-class TestThread(QtCore.QThread):
+class UploadThread(QtCore.QThread):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._run_flag = True
