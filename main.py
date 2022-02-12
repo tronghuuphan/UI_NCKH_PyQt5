@@ -16,12 +16,11 @@ from scripts_database_to_jetsonano import get_image_to_train
 BASE_DIR = os.getcwd()
 IMAGE_DIR = os.path.join(BASE_DIR, 'tmp')
 
-info = None
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
-        self.ui = uic.loadUi('designer.ui', self)
+        self.ui = uic.loadUi('designerV2.ui', self)
     #    self.showFullScreen()
 
         self.thread = {}
@@ -32,7 +31,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.activate_camera_thread()
         self.activate_upload_thread()
         self.activate_get_more_data_to_display_thread(105180292)
-        self.activate_get_data_to_train()
+      #  self.activate_get_data_to_train()
 
     def activate_camera_thread(self):
         self.thread[1] = VideoThread()
@@ -44,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread[2].start()
 
     def activate_upload_thread(self):
-        self.thread[3] = UploadThread(parent=None)
+        self.thread[3] = UploadDownloadImageThread(parent=None)
         self.thread[3].start()
 
     def activate_get_data_to_train(self):
@@ -63,8 +62,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def addlogo(self):  # Add logo and background
         logoclb = QPixmap('bkmaker.png')
-        logokhoa = QPixmap('khoadien.png')
-        background = QPixmap('background.jpg')
+        logokhoa = QPixmap('dut.png')
+        background = QPixmap('photo3.jpg')
         self.logoclb.setPixmap(logoclb)
         self.logokhoa.setPixmap(logokhoa)
         self.background.setPixmap(background)
@@ -110,43 +109,34 @@ class VideoThread(QtCore.QThread):
         # self.wait()
 
 
-class UploadThread(QtCore.QThread):
+class UploadDownloadImageThread(QtCore.QThread):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._run_flag = True
 
     def run(self):
-        os.chdir(IMAGE_DIR)
         print('Start Upload Thread to Log Table')
         while True:
+            os.chdir(IMAGE_DIR)
             if os.listdir(IMAGE_DIR):
                 img_name = os.listdir(IMAGE_DIR)[0]
                 print(img_name)
                 img_data = img_name.split('.')[0]
                 img_data = img_data.split('_')
                 #insert_log_database(img_data[0], img_data[1], img_data[2], img_data[3], img_data[4], img_name)
+                os.chdir(IMAGE_DIR)
                 insert_log_database(
                     105180292, img_data[1], img_data[2], img_data[3], img_data[4], img_name)
+                print(os.getcwd())
                 print(img_data)
                 img_path = os.path.join(IMAGE_DIR, img_name)
                 os.remove(img_path)
-
-    def stop(self):
-        self._run_flag = False
-
-
-class GetDataToTrainThread(QtCore.QThread):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._run_flag = True
-
-    def run(self):
-        print('Start Thread To Train....')
-        while True:
+            os.chdir(BASE_DIR)
             get_image_to_train()
 
     def stop(self):
         self._run_flag = False
+
 
 class GetDataDisplayThread(QtCore.QThread):
     def __init__(self, CCCD, parent=None):
